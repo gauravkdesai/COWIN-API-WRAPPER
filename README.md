@@ -10,7 +10,7 @@ I have written a quick program `ppointment_monitor.py` that uses wrapper `API_wr
 
 The usage is as follows
 ```
-python /Users/gauravdesai/Documents/GitHub.nosync/Smart_COWIN/appointment_monitor.py <district_id> <min_age_limit> <mobile_number>
+python appointment_monitor.py <district_id> <min_age_limit> <mobile_number>
 ```
 
 If you are wondering what is your district id then I have written two wrapper functions `get_states` and `get_districts` to get your state_id and then district_id.
