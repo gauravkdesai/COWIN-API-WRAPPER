@@ -118,37 +118,10 @@ class COWINConnection:
         for_date = COWINConnection.get_formatted_date(for_date)
         return self.get_data_from_url('GET_SESSIONS_BY_DISTRICT_7_DAYS', 'APPOINTMENT_AVAILABILITY_API',
                                       data_input={'district_id': str(district_id), 'date': for_date})
-
+    
     def generate_otp(self, mobile):
         return self.get_data_from_url('GENERATE_OTP', 'USER_AUTHENTICATION_API', data_input={'mobile': mobile})
 
-    def find_appointment_for_age_by_district(self, district_id=None, min_age_limit=None, from_date=None):
-        from_date = COWINConnection.get_formatted_date(from_date)
-        returned_data = self.find_appointment_by_calendar_district(district_id, from_date)
-
-        if not returned_data or "centers" not in returned_data.keys():
-            logging.warning("API did not return any data. continuing to check")
-            return 0
-
-        centers = returned_data["centers"]
-        logging.info(f"Received {len(centers)} centers before filter")
-
-        eligible_centers = []
-        for center in centers:
-            cur_sessions = center['sessions']
-            eligible_sessions = []
-            for cur_ses in cur_sessions:
-                if cur_ses['min_age_limit'] <= min_age_limit and cur_ses['available_capacity'] > 0:
-                    logging.info(f"Eligible session {cur_ses} at center {center}")
-                    eligible_sessions.append(cur_ses)
-
-            if len(eligible_sessions) > 0:
-                temp_center = center.copy()
-                temp_center['sessions'] = eligible_sessions
-                eligible_centers.append(temp_center)
-
-        logging.info(f'After filtering found {len(eligible_centers)} eligible and available centers')
-        return eligible_centers
 
     @staticmethod
     def print_centers(centers):
@@ -169,7 +142,7 @@ class COWINConnection:
         print("*" * 50)
 
     def continuous_run(self, func, mobile=None, sleep_minutes=1, stop_if_found=False, push_notification_required=True,
-                       otp_required=False, **kwargs):
+                       otp_required=True, **kwargs):
         SLEEP_SECONDS = 60 * sleep_minutes  # 1 minutes
         while True:
             try:
@@ -179,6 +152,7 @@ class COWINConnection:
                     if push_notification_required:
                         self.push_notification()
                     if otp_required:
+                        logging.info(f'Generating otp for mobile:{mobile}')
                         otp = self.generate_otp(mobile=mobile)
                     if stop_if_found:
                         logging.warning(f'stop_if_found is set to {stop_if_found}, hence stopping the program')
