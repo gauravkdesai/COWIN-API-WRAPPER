@@ -130,3 +130,6 @@ dmypy.json
 
 # Idea project settings
 .idea   
+
+# log
+*.log*
